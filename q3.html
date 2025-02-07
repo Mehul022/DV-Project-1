@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2c2c2c 100%);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    
+        .container {
+            display: flex;
+            justify-content: space-between;
+            background-color: rgba(249, 251, 249, 0.9);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            width: 100%;
+            max-width: 1200px;
+            position: relative;
+        }
+    
+        #lineChart,
+        #pieChart {
+            background-color: transparent;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+    
+        .line {
+            fill: none;
+            stroke-width: 4;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            cursor: pointer;
+             stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: drawLine 5s ease-out forwards;
+            /* animation-delay: 1.5s; */
+        }
+        @keyframes drawLine {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    
+        .line:hover {
+            stroke-width: 6;
+            opacity: 1;
+            filter: brightness(1.3);
+        }
+    
+        .line-point {
+            /* transition: all 0.3s ease; */
+            cursor: pointer;
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out forwards;
+            
+        }
+         @keyframes fadeIn {
+            from
+            {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    
+        .line-point:hover {
+            r: 8;
+        }
+        .line.active {
+            stroke-width: 8;
+            opacity: 1;
+            filter: brightness(1.3);
+            transform: translateY(-2px);
+        }
+
+        .line.inactive {
+            opacity: 0.2;
+        }
+    
+        .axis path,
+        .axis line {
+            stroke: rgba(18, 18, 18, 0.3);
+            shape-rendering: crispEdges;
+        }
+    
+        .axis text {
+            font-size: 12px;
+            fill: rgba(15, 15, 15, 0.7);
+        }
+    
+        .legend text {
+            font-size: 14px;
+            fill: #100f0f;
+            cursor: pointer;
+        }
+    
+        .arc {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+    
+        .arc:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+    
+        .pie-info {
+            position: absolute;
+            left: 85.5%;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(245, 242, 242, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 250px;
+            color: white;
+        }
+    
+        .pie-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: rgba(18, 17, 17, 0.8);
+        }
+    
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+    
+            #lineChart,
+            #pieChart {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="lineChart"></div>
+        <div id="pieChart"></div>
+    </div>
+    <div id="pieInfo" class="pie-info"></div>
+
+    <script>
+        const lineData = [
+            { category: "Stiletto Nail Length", Competitive: 16, Stiletto: 10, Salon: 20 },
+            { category: "C-Curve", Competitive: 14, Stiletto: 8, Salon: 11 },
+            { category: "Nail Shape", Competitive: 19, Stiletto: 9.5, Salon: 14.6 },
+            { category: "Top Gloss", Competitive: 14, Stiletto: 8.7, Salon: 9.8 },
+            { category: "Upper & Lower Arches", Competitive: 38, Stiletto: 42, Salon: 43 },
+            { category: "Smile Line", Competitive: 13.6, Stiletto: 9.6, Salon: 9.65 },
+            { category: "White Extension", Competitive: 16, Stiletto: 12, Salon: 10.2 },
+            { category: "Apex", Competitive: 23, Stiletto: 19, Salon: 25 }
+        ];
+
+        const pieData = {
+            Competitive: [
+                { name: "POLISH", value: 2.32 },
+                { name: "NAIL SHAPE", value: 7.72 },
+                { name: "SMILE LINE", value: 5.79 },
+                { name: "C-CURVE", value: 7.72 },
+                { name: "UPPER + LOWER ARCH", value: 15.44 },
+                { name: "NAIL LENGTH", value: 7.72 },
+                { name: "TOP GLOSS", value: 3.47 },
+                { name: "WHITE EXTENSION", value: 5.79 },
+                { name: "APEX", value: 7.72 },
+                { name: "OTHERS", value: 36.31 }
+            ],
+            Stiletto: [
+                { name: "NAIL LENGTH", value: 9.09 },
+                { name: "SMILE LINE", value: 4.55 },
+                { name: "UPPER + LOWER ARCH", value: 18.18 },
+                { name: "TOP GLOSS", value: 4.55 },
+                { name: "CREATIVITY", value: 6.82 },
+                { name: "APEX", value: 9.09 },
+                { name: "WHITE EXTENSION", value: 4.55 },
+                { name: "NAILBED", value: 4.55 },
+                { name: "NAIL SHAPE", value: 9.09 },
+                { name: "OTHERS", value: 29.53 }
+            ],
+            Salon: [
+                { name: "UPPER + LOWER ARCH", value: 18.18 },
+                { name: "APEX", value: 9.09 },
+                { name: "NAIL LENGTH", value: 9.09 },
+                { name: "HAIRLINE & FREE EDGE", value: 9.09 },
+                { name: "OTHERS", value: 32.26 },
+                { name: "NAIL SHAPE", value: 4.55 },
+                { name: "WHITE EXTENSION", value: 4.55 },
+                { name: "SMILE LINE", value: 4.55 },
+                { name: "NAILBED", value: 4.55 },
+                { name: "TOP GLOSS", value: 4.09 }
+            ]
+        };
+
+        const margin = { top: 50, right: 150, bottom: 100, left: 60 };
+        const width = 800 - margin.left - margin.right;
+        const height = 500 - margin.top - margin.bottom;
+
+        const colors = {
+                Competitive: "#FF6B6B",
+                Stiletto: "#4ECDC4",
+                Salon: "#9B59B6"
+            };
+        const svg = d3.select("#lineChart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleBand()
+            .domain(lineData.map(d => d.category))
+            .range([0, width])
+            .padding(1);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(lineData, d => Math.max(d.Competitive, d.Stiletto, d.Salon))])
+            .range([height, 0])
+            .nice();
+
+        const line = d3.line()
+            .x(d => x(d.category))
+            .y(d => y(d.value));
+
+        const metrics = ["Competitive", "Stiletto", "Salon"];
+        let currentCategory = "Competitive";
+
+        // Create lines and points
+        metrics.forEach(metric => {
+            const metricData = lineData.map(d => ({
+                category: d.category,
+                value: d[metric],
+                metric: metric
+            }));
+
+            svg.append("path")
+                .datum(metricData)
+                .attr("class", `line ${metric}-line`)
+                .attr("d", line)
+                .style("stroke", colors[metric])
+                .on("mouseover", function () {
+                    d3.selectAll(".line").classed("inactive", true);
+                    d3.select(this).classed("active", true).classed("inactive", false);
+                })
+                .on("mouseout", function () {
+                    d3.selectAll(".line").classed("inactive", false).classed("active", false);
+                })
+                .on("click", function () {
+                    currentCategory = metric;
+                    updatePieChart(metric);
+                });
+
+            svg.selectAll(`circle-${metric}`)
+                .data(metricData)
+                .enter()
+                .append("circle")
+                .attr("class", `line-point ${metric}-point`)
+                .attr("cx", d => x(d.category))
+                .attr("cy", d => y(d.value))
+                .attr("r", 6)
+                .style("fill", colors[metric])
+                .on("mouseover", function () {
+                    d3.selectAll(".line").classed("inactive", true);
+                    d3.select(`.${metric}-line`).classed("active", true).classed("inactive", false);
+                })
+                .on("mouseout", function () {
+                    d3.selectAll(".line").classed("inactive", false).classed("active", false);
+                })
+                .on("click", function () {
+                    currentCategory = metric;
+                    updatePieChart(metric);
+                });
+        });
+
+        // Add axes
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .attr("transform", "rotate(-45)")
+            .style("text-anchor", "end");
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y));
+
+        // Add title
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text("Nail Competition Criteria Comparison");
+
+        // Add legend
+        const legend = svg.append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${width + 20}, 0)`);
+
+        metrics.forEach((metric, i) => {
+            const legendItem = legend.append("g")
+                .attr("class", "legend-item")
+                .attr("transform", `translate(0, ${i * 20})`)
+                .on("mouseover", () => {
+                    d3.selectAll(".line").classed("inactive", true);
+                    d3.select(`.${metric}-line`).classed("active", true).classed("inactive", false);
+                })
+                .on("mouseout", () => {
+                    d3.selectAll(".line").classed("inactive", false).classed("active", false);
+                })
+                .on("click", () => {
+                    currentCategory = metric;
+                    updatePieChart(metric);
+                });
+
+            legendItem.append("circle")
+                .attr("r", 4)
+                .style("fill", colors[metric]);
+
+            legendItem.append("text")
+                .attr("x", 10)
+                .attr("y", 0)
+                .attr("dy", "0.32em")
+                .text(metric);
+        });
+
+        // Pie chart setup
+        const pieWidth = 400;
+        const pieHeight = 400;
+        const radius = Math.min(pieWidth, pieHeight) / 2 - 40;
+
+        const pieSvg = d3.select("#pieChart")
+            .append("svg")
+            .attr("width", pieWidth)
+            .attr("height", pieHeight)
+            .append("g")
+            .attr("transform", `translate(${pieWidth / 2},${pieHeight / 2})`);
+
+        const pie = d3.pie()
+            .value(d => d.value)
+            .sort(null);
+
+        const arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius);
+
+        function updatePieInfo(data) {
+            const pieInfo = d3.select("#pieInfo");
+
+            pieInfo.html(data.map(item => `
+                <div class="pie-info-item">
+                    <span style="font-weight:600;">${item.name}</span>
+                    <span style="color:rgba(0,0,0,0.6);">${item.value}%</span>
+                </div>
+            `).join(''))
+                .style("display", "block");
+        }
+
+        function updatePieChart(category) {
+            pieSvg.selectAll("*").remove();
+            updatePieInfo(pieData[category]);
+
+            const arcs = pieSvg.selectAll("arc")
+                .data(pie(pieData[category]))
+                .enter()
+                .append("g")
+                .attr("class", "arc");
+
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", (d, i) => d3.schemeCategory10[i])
+                .attr("stroke", "white")
+                .style("stroke-width", "1px")
+                .on("mouseover", function (event, d) {
+                    d3.select(this)
+                        .transition()
+                        .attr("d", d3.arc().innerRadius(0).outerRadius(radius * 1.1));
+
+                    const pieInfo = d3.select("#pieInfo");
+                    pieInfo.html(`
+                        <div class="pie-info-item">
+                            <span style="font-weight:600;">${d.data.name}</span>
+                            <span style="color:rgba(0,0,0,0.6);">${d.data.value}%</span>
+                        </div>
+                    `);
+                })
+                .on("mouseout", function () {
+                    d3.select(this)
+                        .transition()
+                        .attr("d", arc);
+                    updatePieInfo(pieData[currentCategory]);
+                });
+
+            pieSvg.append("text")
+                .attr("x", 0)
+                .attr("y", -radius - 20)
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text(`${category} Criteria Weightage`);
+        }
+
+        // Initialize with Competitive data
+        updatePieChart("Competitive");
+    </script>
+</body>
+
+</html>

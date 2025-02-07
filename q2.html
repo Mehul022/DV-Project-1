@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Geographic Distribution</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            margin: 0;
+            padding: 20px;
+            color: #f3f4f6;
+        }
+    
+        .dashboard {
+            margin-top: 10vh;
+            margin-left: 14vw;
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            /* margin: 0 auto; */
+            background-color: #1f2937;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+    
+        .map-container,
+        .chart-container {
+            flex: 1;
+            background: #242f41;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #374151;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+    
+        .map-container:hover,
+        .chart-container:hover {
+            transform: translateY(-2px);
+        }
+    
+        .country {
+            fill: #2d3748;
+            stroke: #1a202c;
+            stroke-width: 0.5;
+            transition: all 0.3s ease;
+        }
+    
+        .country:hover {
+            opacity: 0.8;
+            stroke: #ffffff;
+            stroke-width: 1;
+            filter: brightness(1.2);
+        }
+    
+        .bar {
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+    
+        .bar:hover {
+            opacity: 0.8;
+            filter: brightness(1.2) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        }
+    
+        .title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #374151;
+        }
+    
+        .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f3f4f6;
+            letter-spacing: 0.5px;
+        }
+    
+        .sort-button {
+            padding: 6px 12px;
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            background: #1f2937;
+            color: #f3f4f6;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+    
+        .sort-button:hover {
+            background: #3b82f6;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+    
+        .sort-button:active {
+            transform: translateY(0);
+        }
+    
+        .tooltip {
+            position: absolute;
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid #4b5563;
+            padding: 10px 14px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            font-size: 13px;
+            color: #f3f4f6;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+        }
+    
+        .axis text {
+            font-size: 11px;
+            fill: #9ca3af;
+        }
+    
+        .axis path,
+        .axis line {
+            stroke: #4b5563;
+        }
+    
+        .axis .domain {
+            stroke: #4b5563;
+        }
+    
+        .axis .tick line {
+            stroke: #374151;
+            stroke-opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <div class="map-container">
+            <div class="title">Winners by Country</div>
+            <div id="map"></div>
+        </div>
+        <div class="chart-container">
+            <div class="title-container">
+                <div class="title">Judges by Country</div>
+                <button class="sort-button" onclick="toggleSort()">Sort by Name</button>
+            </div>
+            <div id="barchart"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script>
+        let currentSort = 'value';
+        const mapWidth = 500;
+        const mapHeight = 350;
+        const barWidth = 500;
+        const barHeight = 350;
+        const margin = { top: 15, right: 20, bottom: 30, left: 120 };
+
+        const mapSvg = d3.select("#map")
+            .append("svg")
+            .attr("viewBox", `0 0 ${mapWidth} ${mapHeight}`)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const barSvg = d3.select("#barchart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${barWidth} ${barHeight}`)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip");
+
+        const projection = d3.geoMercator()
+            .scale(80)
+            .center([0, 20])
+            .translate([mapWidth / 2, mapHeight / 2]);
+
+        const path = d3.geoPath().projection(projection);
+
+        let judgeFrequency = {};
+        let x, y;
+
+        function toggleSort() {
+            currentSort = currentSort === 'value' ? 'name' : 'value';
+            const button = document.querySelector('.sort-button');
+            button.textContent = `Sort by ${currentSort === 'value' ? 'Name' : 'Value'}`;
+            updateBarChart();
+        }
+
+        function updateBarChart() {
+            const sortedData = Object.entries(judgeFrequency)
+                .sort((a, b) => {
+                    if (currentSort === 'value') {
+                        return b[1] - a[1];
+                    }
+                    return a[0].localeCompare(b[0]);
+                });
+
+            y.domain(sortedData.map(d => d[0]));
+
+            const bars = barSvg.selectAll(".bar")
+                .data(sortedData, d => d[0]);
+
+            bars.transition()
+                .duration(750)
+                .attr("y", d => y(d[0]))
+                .attr("width", d => x(d[1]) - margin.left);
+
+            barSvg.select(".y-axis")
+                .transition()
+                .duration(750)
+                .call(d3.axisLeft(y));
+        }
+
+        Promise.all([
+            d3.json("https://enjalot.github.io/wwsd/data/world/world-110m.geojson"),
+            d3.csv("Participants.csv"),
+            d3.csv("Judges.csv")
+        ]).then(([worldData, participantsData, judgesData]) => {
+            const participantFrequency = {};
+            participantsData.forEach(d => {
+                participantFrequency[d.Country] = (participantFrequency[d.Country] || 0) + 1;
+            });
+
+            judgesData.forEach(d => {
+                judgeFrequency[d.Country] = (judgeFrequency[d.Country] || 0) + 1;
+            });
+
+            const participantColorScale = d3.scaleSequential()
+                .domain([0, d3.max(Object.values(participantFrequency)) || 1])
+                .interpolator(d3.interpolate("#4a9eff", "#1e40af"));
+
+            const judgeColorScale = d3.scaleSequential()
+                .domain([0, d3.max(Object.values(judgeFrequency)) || 1])
+                .interpolator(d3.interpolate("#22c55e", "#166534"));
+
+            const sortedData = Object.entries(judgeFrequency)
+                .sort((a, b) => b[1] - a[1]);
+
+            x = d3.scaleLinear()
+                .domain([0, d3.max(sortedData, d => d[1])])
+                .range([margin.left, barWidth - margin.right]);
+
+            y = d3.scaleBand()
+                .domain(sortedData.map(d => d[0]))
+                .range([margin.top, barHeight - margin.bottom])
+                .padding(0.2);
+
+            mapSvg.selectAll("path")
+                .data(worldData.features)
+                .enter()
+                .append("path")
+                .attr("class", "country")
+                .attr("d", path)
+                .style("fill", d => {
+                    const count = participantFrequency[d.properties.name] || 0;
+                    return count > 0 ? participantColorScale(count) : "#404040";
+                })
+                .on("mouseover", (event, d) => {
+                    const count = participantFrequency[d.properties.name] || 0;
+                    tooltip.transition().duration(200).style("opacity", .9);
+                    tooltip.html(`${d.properties.name}: ${count} Winner${count !== 1 ? 's' : ''}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", () => {
+                    tooltip.transition().duration(500).style("opacity", 0);
+                });
+
+            barSvg.selectAll("rect")
+                .data(sortedData, d => d[0])
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", margin.left)
+                .attr("y", d => y(d[0]))
+                .attr("width", d => x(d[1]) - margin.left)
+                .attr("height", y.bandwidth())
+                .attr("fill", d => judgeColorScale(d[1]))
+                .on("mouseover", (event, d) => {
+                    tooltip.transition().duration(200).style("opacity", .9);
+                    tooltip.html(`${d[0]}: ${d[1]} judge${d[1] !== 1 ? 's' : ''}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", () => {
+                    tooltip.transition().duration(500).style("opacity", 0);
+                });
+
+            barSvg.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", `translate(0,${barHeight - margin.bottom})`)
+                .call(d3.axisBottom(x).ticks(5));
+
+            barSvg.append("g")
+                .attr("class", "y-axis")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y));
+        });
+    </script>
+</body>
+
+</html>

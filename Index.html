@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nailympia Overview</title>
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-hover: #7C3AED;
+            --background: #111827;
+            --card-bg: #1F2937;
+            --text: #E5E7EB;
+            --text-secondary: #9CA3AF;
+            --accent: #3B82F6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 80vw;
+            margin: auto;
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .metric {
+            display: inline-block;
+            width: calc(50% - 40px);
+            background: rgba(139, 92, 246, 0.1);
+            padding: 20px;
+            margin: 10px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metric:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+        }
+
+        .navbar {
+            background-color: rgba(31, 41, 55, 0.95);
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-content {
+            max-width: 80vw;
+            margin: auto;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .navbar a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            background-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text);
+            margin-top: 1.5em;
+            margin-bottom: 0.75em;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 100%;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .timeline ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            position: relative;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .timeline ul::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+
+        .timeline li {
+            position: relative;
+            padding: 10px 15px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .timeline li::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: var(--primary);
+            border: 3px solid var(--card-bg);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            transition: all 0.2s;
+        }
+
+        .timeline li:hover::before {
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.7);
+        }
+
+        .timeline li span {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            background: var(--card-bg);
+            padding: 5px 10px;
+            border-radius: 6px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .timeline li:nth-child(odd) span {
+            bottom: 30px;
+        }
+
+        .timeline li:nth-child(even) span {
+            top: 30px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5em;
+        }
+
+        strong {
+            color: var(--text);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 95vw;
+                padding: 20px;
+            }
+
+            .metric {
+                width: calc(100% - 40px);
+            }
+
+            .timeline ul {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .timeline li {
+                margin: 20px 0;
+            }
+
+            .timeline ul::before {
+                height: 100%;
+                width: 3px;
+                left: 50%;
+                top: 0;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="nav-content">
+            <a href="Dashboard.html">Home</a>
+            <a href="q1.html">Judges Data</a>
+            <a href="q2.html">Winners Data</a>
+            <a href="q3.html">Category Comparison</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Nailympia Overview</h1>
+        <p><strong>What is Nailympia?</strong> Nailympia is a global nail competition founded in 2001, providing a
+            non-product biased platform for artists. Events are held worldwide, including in London, Rio, Düsseldorf,
+            and the USA.</p>
+
+        <h2>Summary of the Event and Dataset</h2>
+        <p>Nailympia brings together top nail artists from around the world, competing in various categories such as
+            Competitive, Salon, and Stiletto. The event showcases creativity, technique, and innovation in the nail
+            industry.</p>
+        <p>The dataset includes details on judges, winners by event, and a comparison of nail categories. Judges' data
+            highlights their experience, specialty, and contributions to competition standards. The winners' dataset
+            captures event divisions, geographic spread, and year-wise competition insights. The category dataset
+            compares judging criteria among different styles.</p>
+
+        <h2>Key Metrics</h2>
+        <div class="metric"><strong>Total Places Events Held:</strong> 14</div>
+        <div class="metric"><strong>Number of Countries Won for past 2 years:</strong> 33</div>
+        <div class="metric"><strong>Judges Panel Size:</strong> 63</div>
+        <div class="metric"><strong>Categories Covered:</strong> 3 (Competitive, Salon, Stiletto)</div>
+
+        <h2>Questions and Purposes</h2>
+        <h3>1. How often do countries with fewer judges participate in international events compared to countries with a
+            larger representation and does more judges lead to a higher number of winners?</h3>
+        <p>Purpose: To analyze the correlation between the number of judges from a country and the number of winners
+            from that country.</p>
+
+        <h3>2. How do the judging priorities differ among Competitive, Salon, and Stiletto categories?</h3>
+        <p>Purpose: To understand the different judging criteria and their importance across various competition
+            categories.</p>
+
+        <h3>3. Do judges with certain expertise tend to have judged more number of events on average and have remained
+            judge for more number of years on average in comparison to those with other types of expertise?</h3>
+        <p>Purpose: To analyze the experience and event participation of judges based on their areas of expertise.</p>
+
+        <h2>Competitions Held Over the Last 2 Years</h2>
+        <div class="timeline">
+            <ul>
+                <li><span>NAILYMPIA London 2024</span></li>
+                <li><span>NAILYMPIA San Antonio 2024</span></li>
+                <li><span>NAILYMPIA Mexico 2024</span></li>
+                <li><span>NAILYMPIA Vietnam 2024</span></li>
+                <li><span>NAILYMPIA London 2023</span></li>
+                <li><span>NAILYMPIA Columbus 2023</span></li>
+                <li><span>NAILYMPIA San Antonio 2023</span></li>
+                <li><span>NAILYMPIA Orlando 2023</span></li>
+                <li><span>NAILYMPIA Anaheim 2023</span></li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

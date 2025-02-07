@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Double Bar Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: .02rem;
+        }
+
+        h2 {
+            color: #e2e8f0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .chart-wrapper {
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #334155;
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        button:hover {
+            background: #475569;
+        }
+
+        button:hover::before {
+            transform: translateX(100%);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .bar-group rect {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom;
+        }
+
+        .bar-group:hover rect {
+            filter: brightness(1.3);
+            transform: scaleY(1.05);
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(15, 23, 42, 0.95);
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            transform: translate(-50%, -100%);
+            transition: all 0.2s ease;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 0.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.05rem;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.05rem .1rem;
+            border-radius: 8px;
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .x-axis text,
+        .y-axis text {
+            font-size: 0.8rem;
+            fill: #94a3b8;
+        }
+
+        .x-axis path,
+        .y-axis path,
+        .x-axis line,
+        .y-axis line {
+            stroke: #475569;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .chart-wrapper {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .legend {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="chart-wrapper">
+            <h2>Average Number of Events Judged vs. Years of Experience</h2>
+            <div class="controls">
+                <button onclick="sortData('years', 'asc')">Sort by Years (Asc)</button>
+                <button onclick="sortData('years', 'desc')">Sort by Years (Desc)</button>
+                <button onclick="sortData('events', 'asc')">Sort by Events (Asc)</button>
+                <button onclick="sortData('events', 'desc')">Sort by Events (Desc)</button>
+            </div>
+            <div class="chart-container">
+                <div class="tooltip"></div>
+                <svg></svg>
+            </div>
+            <div class="legend"></div>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            { expertise: "Nail Art", years: 10.5, events: 4.5 },
+            { expertise: "Structure", years: 14.2, events: 8.3 },
+            { expertise: "Floor Judging", years: 10.8, events: 2.5 },
+            { expertise: "Technical", years: 9.7, events: 5.1 },
+            { expertise: "Mixed Media", years: 12.4, events: 6.8 },
+            { expertise: "Pink & White", years: 13.5, events: 7.2 },
+            { expertise: "Overall", years: 22.1, events: 15.6 }
+        ];
+
+        const margin = { top: 20, right: 20, bottom: 60, left: 60 };
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        const svg = d3.select("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.3); // Increased padding between group bars
+
+        const subX = d3.scaleBand()
+            .domain(["years", "events"])
+            .padding(0.2); // Increased padding between individual bars
+
+        const y = d3.scaleLinear()
+            .range([height, 0]);
+
+        const color = d3.scaleOrdinal()
+            .domain(["years", "events"])
+            .range(["#ec4899", "#3b82f6"]);
+
+        function update(data) {
+            // Update scales
+            x.domain(data.map(d => d.expertise));
+            subX.range([0, x.bandwidth()]); // Update subX range based on new x bandwidth
+            y.domain([0, d3.max(data, d => Math.max(d.years, d.events))]).nice();
+
+            // Update axes with transitions
+            const xAxis = svg.selectAll(".x-axis").data([null]);
+            const yAxis = svg.selectAll(".y-axis").data([null]);
+
+            xAxis.enter()
+                .append("g")
+                .attr("class", "x-axis")
+                .merge(xAxis)
+                .attr("transform", `translate(0,${height})`)
+                .transition()
+                .duration(750)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .attr("transform", "rotate(-45)")
+                .style("text-anchor", "end");
+
+            yAxis.enter()
+                .append("g")
+                .attr("class", "y-axis")
+                .merge(yAxis)
+                .transition()
+                .duration(750)
+                .call(d3.axisLeft(y));
+
+            // Update bars
+            const groups = svg.selectAll(".bar-group")
+                .data(data, d => d.expertise);
+
+            // Remove old groups
+            groups.exit().remove();
+
+            // Create new groups
+            const groupsEnter = groups.enter()
+                .append("g")
+                .attr("class", "bar-group");
+
+            // Update all groups
+            const allGroups = groupsEnter.merge(groups)
+                .transition()
+                .duration(750)
+                .attr("transform", d => `translate(${x(d.expertise)},0)`);
+
+            // Update bars within groups
+            const bars = allGroups.selection().selectAll("rect")
+                .data(d => ["years", "events"].map(key => ({
+                    key,
+                    value: d[key],
+                    expertise: d.expertise
+                })));
+
+            // Remove old bars
+            bars.exit().remove();
+
+            // Add new bars
+            bars.enter()
+                .append("rect")
+                .attr("x", d => subX(d.key))
+                .attr("width", subX.bandwidth())
+                .attr("y", height)
+                .attr("height", 0)
+                .attr("fill", d => color(d.key))
+                .merge(bars)
+                .transition()
+                .duration(750)
+                .attr("x", d => subX(d.key))
+                .attr("width", subX.bandwidth())
+                .attr("y", d => y(d.value))
+                .attr("height", d => height - y(d.value))
+                .attr("fill", d => color(d.key));
+
+            // Update tooltips
+            svg.selectAll(".bar-group rect")
+                .on("mouseover", function (event, d) {
+                    const tooltip = d3.select(".tooltip");
+                    const tooltipWidth = 150;
+
+                    tooltip.style("display", "block")
+                        .style("opacity", "0")
+                        .html(`
+                            <strong>${d.expertise}</strong><br>
+                            ${d.key}: ${d.value.toFixed(1)}
+                        `)
+                        .style("left", (event.pageX - tooltipWidth / 2) + "px")
+                        .style("top", (event.pageY - 10) + "px")
+                        .transition()
+                        .duration(200)
+                        .style("opacity", "1");
+                })
+                .on("mousemove", function (event) {
+                    const tooltip = d3.select(".tooltip");
+                    const tooltipWidth = 150;
+
+                    tooltip
+                        .style("left", (event.pageX - tooltipWidth / 2) + "px")
+                        .style("top", (event.pageY - 10) + "px");
+                })
+                .on("mouseout", function () {
+                    d3.select(".tooltip")
+                        .transition()
+                        .duration(200)
+                        .style("opacity", "0")
+                        .on("end", function () {
+                            d3.select(this).style("display", "none");
+                        });
+                });
+
+            // Update legend
+            const legend = d3.select(".legend");
+            legend.html("");
+            ["years", "events"].forEach(key => {
+                const item = legend.append("div")
+                    .attr("class", "legend-item");
+                item.append("svg")
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .append("rect")
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .attr("rx", 6)
+                    .attr("fill", color(key));
+                item.append("span")
+                    .text(key.charAt(0).toUpperCase() + key.slice(1));
+            });
+        }
+
+        function sortData(key, order) {
+            data.sort((a, b) => {
+                return order === 'asc' ? a[key] - b[key] : b[key] - a[key];
+            });
+            update(data);
+        }
+
+        // Initial render
+        update(data);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.querySelector('.chart-container');
+            const containerWidth = container.offsetWidth;
+            const scale = containerWidth / (width + margin.left + margin.right);
+
+            svg.attr("width", containerWidth)
+                .attr("height", (height + margin.top + margin.bottom) * scale);
+        });
+    </script>
+</body>
+
+</html>
