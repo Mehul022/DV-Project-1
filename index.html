@@ -5,29 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nailympia Overview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Asul:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #8B5CF6;
+            --primary: #68bae0;
             --primary-hover: #7C3AED;
             --background: #111827;
-            --card-bg: #1F2937;
-            --text: #E5E7EB;
-            --text-secondary: #9CA3AF;
-            --accent: #3B82F6;
+            --card-bg: #fff3f3;
+            /* Softer background for better readability */
+            --text: #222222;
+            /* Darker for improved contrast */
+            --text-secondary: #6b1a89;
+            /* Adjusted to a deep purple */
+            --accent: #ff4081;
+            /* Vibrant pink to complement the theme */
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Tinos', serif;
             margin: 0;
+            background: url('x.png') no-repeat center center fixed;
+            background-size: cover;
             background-color: var(--background);
             color: var(--text);
             line-height: 1.6;
+            opacity: 0.95;
         }
 
         .container {
-            max-width: 80vw;
+            max-width: 90vw;
             margin: auto;
-            background: var(--card-bg);
+            background-image: url('bg2.jpeg');
+            background-size: cover;
             padding: 32px;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -36,25 +45,46 @@
             backdrop-filter: blur(10px);
         }
 
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            /* White overlay to soften background */
+            border-radius: 16px;
+            z-index: -1;
+        }
+
         .metric {
             display: inline-block;
-            width: calc(50% - 40px);
-            background: rgba(139, 92, 246, 0.1);
+            width: calc(50% - 70px);
+            background: rgba(213, 232, 246, 0.8);
+            /* Soft pastel blue */
+            color: #3A506B;
+            /* Darker blue for contrast */
             padding: 20px;
             margin: 10px;
             border-radius: 12px;
             text-align: center;
-            border: 1px solid rgba(139, 92, 246, 0.2);
+            font-weight: bolder;
+            font-size: 1.3em;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
 
         .metric:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(58, 80, 107, 0.3);
+            /* Slightly deeper blue shadow */
         }
 
         .navbar {
-            background-color: rgba(31, 41, 55, 0.95);
+            background: linear-gradient(to right, #d63484, #ff80bf, #ffc0cb);
+            /* More vibrant */
             padding: 16px;
             position: sticky;
             top: 0;
@@ -71,12 +101,13 @@
         }
 
         .navbar a {
-            color: var(--text);
+            color: #fff;
+            /* White for contrast */
             text-decoration: none;
             padding: 10px 20px;
             border-radius: 8px;
             transition: all 0.2s;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .navbar a:hover {
@@ -93,11 +124,16 @@
         }
 
         h1 {
-            font-size: 2.5em;
-            background: linear-gradient(45deg, var(--primary), var(--accent));
+            font-size: 2.8em;
+            background: linear-gradient(4deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: inline-block;
+
+        }
+
+        h2 {
+            font-size: 1.7em;
+            margin-bottom: 0;
         }
 
         .timeline {
@@ -147,7 +183,7 @@
             border: 3px solid var(--card-bg);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(88, 17, 255, 0.5);
             transition: all 0.2s;
         }
 
@@ -163,7 +199,7 @@
             white-space: nowrap;
             background: var(--card-bg);
             padding: 5px 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -178,12 +214,18 @@
         }
 
         p {
-            color: var(--text-secondary);
-            margin-bottom: 1.5em;
+            font-size: 1.3em;
+            color: #333333;
+            /* Darker text for better visibility */
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
         }
 
         strong {
-            color: var(--text);
+            color: #000;
+            font-family: 'Asul', sans-serif;
+            font-size: 1.5em;
         }
 
         @media (max-width: 768px) {
@@ -213,26 +255,69 @@
                 transform: translateX(-50%);
             }
         }
+
+        .overview-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            /* Increased spacing */
+            padding: 10px;
+            margin-bottom: 0;
+        }
+
+        .text-content {
+            flex: 1;
+            max-width: 75%;
+            /* Increase width */
+        }
+
+        .image-container {
+            flex-shrink: 0;
+            max-width: 750px;
+            /* Increase image size */
+        }
+
+        .overview-image {
+            width: 100%;
+            height: auto;
+            border-radius: 2px;
+        }
+
+        h1 {
+            margin-top: 0;
+            /* Remove extra space */
+            padding-top: 0;
+            /* Ensure no padding pushes it down */
+            font-size: 3.5em;
+            /* Increase title size */
+        }
+
+        p {
+            font-size: 1.5em;
+            /* Increase paragraph text */
+            margin-bottom: 0;
+        }
     </style>
 </head>
 
 <body>
     <div class="navbar">
         <div class="nav-content">
-            <a href="Dashboard.html">Home</a>
-            <a href="q1.html">Judges Data</a>
-            <a href="q2.html">Winners Data</a>
+            <a href="index.html">Home</a>
             <a href="q3.html">Category Comparison</a>
+            <a href="q2.html">Winners Data</a>
+            <a href="q1.html">Judges Data</a>
         </div>
     </div>
 
     <div class="container">
-        <h1>Nailympia Overview</h1>
-        <p><strong>What is Nailympia?</strong> Nailympia is a global nail competition founded in 2001, providing a
+        <h1 class="title">Nailympia Overview</h1>
+        <h2><strong>What is Nailympia?</strong></h2>
+        <p>Nailympia is a global nail competition founded in 2001, providing a
             non-product biased platform for artists. Events are held worldwide, including in London, Rio, Düsseldorf,
             and the USA.</p>
-
-        <h2>Summary of the Event and Dataset</h2>
+        <h2><strong>Summary of the Event and Dataset</strong></h2>
         <p>Nailympia brings together top nail artists from around the world, competing in various categories such as
             Competitive, Salon, and Stiletto. The event showcases creativity, technique, and innovation in the nail
             industry.</p>
@@ -241,13 +326,13 @@
             captures event divisions, geographic spread, and year-wise competition insights. The category dataset
             compares judging criteria among different styles.</p>
 
-        <h2>Key Metrics</h2>
-        <div class="metric"><strong>Total Places Events Held:</strong> 14</div>
-        <div class="metric"><strong>Number of Countries Won for past 2 years:</strong> 33</div>
-        <div class="metric"><strong>Judges Panel Size:</strong> 63</div>
-        <div class="metric"><strong>Categories Covered:</strong> 3 (Competitive, Salon, Stiletto)</div>
+        <h2><strong>Key Metrics</strong></h2>
+        <div class="metric">Total Places Events Held : 14</div>
+        <div class="metric">Number of Countries Won for past 2 years : 33</div>
+        <div class="metric">Judges Panel Size : 63</div>
+        <div class="metric">Categories Covered : 3 (Competitive, Salon, Stiletto)</div>
 
-        <h2>Questions and Purposes</h2>
+        <h2><strong>Questions and Purposes</strong></h2>
         <h3>1. How often do countries with fewer judges participate in international events compared to countries with a
             larger representation and does more judges lead to a higher number of winners?</h3>
         <p>Purpose: To analyze the correlation between the number of judges from a country and the number of winners
@@ -261,7 +346,7 @@
             judge for more number of years on average in comparison to those with other types of expertise?</h3>
         <p>Purpose: To analyze the experience and event participation of judges based on their areas of expertise.</p>
 
-        <h2>Competitions Held Over the Last 2 Years</h2>
+        <h2><strong>Competitions Held Over the Last 2 Years</strong></h2>
         <div class="timeline">
             <ul>
                 <li><span>NAILYMPIA London 2024</span></li>

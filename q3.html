@@ -3,30 +3,40 @@
 
 <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Asul:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e1e1e 0%, #2c2c2c 100%);
-            color: #e0e0e0;
+            color:  #111827;
             margin: 0;
             padding: 20px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: 'Asul', sans-serif;
+            background-image: url('bg8.jpeg'); /* Local image */
+            background-size: cover; /* Cover the entire screen */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat;
+            opacity: 1.9;
+            z-index: -1;
+            
         }
     
         .container {
             display: flex;
             justify-content: space-between;
-            background-color: rgba(249, 251, 249, 0.9);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            background-color: #dbcce5;
+            box-shadow: 3px 10px 35px rgb(2, 2, 84);
             border-radius: 15px;
             padding: 20px;
             backdrop-filter: blur(15px);
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             position: relative;
+            /* margin-left: 1%; */
         }
     
         #lineChart,
@@ -92,18 +102,19 @@
     
         .axis path,
         .axis line {
-            stroke: rgba(18, 18, 18, 0.3);
+            stroke: rgb(15, 2, 2);
             shape-rendering: crispEdges;
         }
     
         .axis text {
             font-size: 12px;
-            fill: rgba(15, 15, 15, 0.7);
+            fill: rgb(1, 0, 0);
+            font-family: 'Asul', sans-serif;
         }
     
         .legend text {
-            font-size: 14px;
-            fill: #100f0f;
+            font-size: 19px;
+            fill: #0e0101;
             cursor: pointer;
         }
     
@@ -122,13 +133,13 @@
             left: 85.5%;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(245, 242, 242, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgb(177, 173, 173);
+            border: 1px solid rgba(18, 15, 15, 0.1);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             padding: 15px;
             border-radius: 10px;
             max-width: 250px;
-            color: white;
+            color: rgb(9, 9, 9);
         }
     
         .pie-info-item {
@@ -151,10 +162,81 @@
                 margin-bottom: 20px;
             }
         }
+
+        button {
+            background: #e9eaeb;
+            color: #efe8e8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Asul', sans-serif;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+
+        button:hover {
+            background: #475569;
+        }
+
+        button:hover::before {
+            transform: translateX(100%);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .back-button-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .back-button-wrapper button {
+            background: #e5e6e7;
+            color: #131517;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .back-button-wrapper button:hover {
+            background: #e7e8e9;
+        }
+        
+        .back-button-wrapper button:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 
 <body>
+    
+    <div class="back-button-wrapper">
+        <button onclick="window.location.href='index.html'">Back to Home</button>
+    </div>
     <div class="container">
         <div id="lineChart"></div>
         <div id="pieChart"></div>
@@ -162,6 +244,11 @@
     <div id="pieInfo" class="pie-info"></div>
 
     <script>
+        const nailEmojis = {
+                Competitive: '💅',
+                Stiletto: '💫',
+                Salon: '✨'
+            };
         const lineData = [
             { category: "Stiletto Nail Length", Competitive: 16, Stiletto: 10, Salon: 20 },
             { category: "C-Curve", Competitive: 14, Stiletto: 8, Salon: 11 },
@@ -311,6 +398,7 @@
             .attr("y", -20)
             .attr("text-anchor", "middle")
             .style("font-size", "16px")
+            .style("fill", "black")
             .text("Nail Competition Criteria Comparison");
 
         // Add legend
@@ -417,6 +505,7 @@
                 .attr("y", -radius - 20)
                 .attr("text-anchor", "middle")
                 .style("font-size", "16px")
+                .style("fill", "Black")
                 .text(`${category} Criteria Weightage`);
         }
 
